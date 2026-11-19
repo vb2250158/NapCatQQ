@@ -1,6 +1,7 @@
 # Develop
 node_modules/
-pnpm-lock.yaml
+# 锁文件纳入版本控制：上游原本忽略它，但那样 clone 后会重新解析依赖，
+# 构建结果不可复现（pnpm 10+ 还会因 allowBuilds 缺失而拦下构建脚本）。
 out/
 dist/
 /src/core.lib/common/

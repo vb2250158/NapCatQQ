@@ -1,2 +1,18 @@
 packages:
   - packages/*
+
+# pnpm 10+ 默认不执行依赖自带的安装脚本。以下包必须在安装期构建，
+# 否则 vite（esbuild / @swc/core）、PTY（node-pty）、图片处理（sharp）会在
+# pnpm install --frozen-lockfile 之后不可用。填 false 会让构建直接失败。
+allowBuilds:
+  '@heroui/shared-utils': true
+  # 它的 postinstall 要从 GitHub Releases 拉预编译二进制，下拉失败时退回本地
+  # node-gyp，在 Windows + Node 22 上会 spawn EINVAL。它只服务 WebUI 的终端
+  # 面板（napcat-webui-backend -> napcat-pty），不影响 QQ 收发消息，因此跳过
+  # 构建；需要终端功能时按 FORK-NOTES.md 里的说明单独补二进制。
+  '@homebridge/node-pty-prebuilt-multiarch': false
+  '@swc/core': true
+  esbuild: true
+  sharp: true
+  ttf2woff2: true
+  unrs-resolver: true

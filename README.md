@@ -11,6 +11,45 @@ _Modern protocol-side framework implemented based on NTQQ._
 
 ---
 
+> [!IMPORTANT]
+> **这是上游停止维护后的恢复副本。**
+>
+> `NapNeko/NapCatQQ` 于 2026-11-10 宣布 Ending，2026-11-12 清空仓库内容并把历史重写为只剩 README 的孤儿提交，Releases 与 Tags 也一并删除。原仓库现在既取不到源码，也下不到安装包。
+>
+> 本仓库保存清空前的最后一份完整源码（上游提交 `72912f2`），并重新提供可用的安装包：
+>
+> - 直接使用：[Releases](https://github.com/vb2250158/NapCatQQ/releases) → `NapCat.Shell.Windows.OneKey.zip`
+> - 源码基线、恢复过程与已知限制：[FORK-NOTES.md](./FORK-NOTES.md)
+> - 上游原话是「如果感兴趣可以自行 Fork」，本仓库就是在做这件事。
+
+## 从这个仓库安装（Windows）
+
+1. 到 [Releases](https://github.com/vb2250158/NapCatQQ/releases) 下载 `NapCat.Shell.Windows.OneKey.zip`（约 29 MB）。
+2. 解压到任意目录，得到 `NapCatInstaller.exe`、`NapCat.Shell.zip`、`7z.exe`、`7z.dll`。
+3. 运行 `NapCatInstaller.exe`，解出 `NapCat.<build>.Shell` 目录。
+4. 运行 `NapCat.<build>.Shell\napcat.bat`，它会拉起 QQ 并注入 NapCat。
+5. 首次启动会打印 WebUI 地址与 token，浏览器打开 `http://127.0.0.1:6099/webui`，扫码登录专用 QQ 号（不要用主号）。
+6. 在 WebUI 的「网络配置」里加 OneBot 服务：
+   - HTTP Server：`127.0.0.1:3000`
+   - WebSocket Client（反向 WS）：`ws://127.0.0.1:<你的网关端口>`
+7. 验证：`POST http://127.0.0.1:3000/get_status` 能返回 JSON 即通。
+
+本副本的安装包对应 **NapCat 4.18.4 / QQ 9.9.26-44498**。QQ 客户端升级后注入可能失效，换版本前先确认 `packages/napcat-protocol` 与 `packages/napcat-native` 是否覆盖。
+
+## 从源码构建
+
+```bash
+pnpm i
+pnpm build:shell        # 生成注入产物 napcat.mjs 等
+pnpm build:webui        # WebUI 前端
+pnpm build:framework
+pnpm build:plugin-builtin
+```
+
+`pnpm-workspace.yaml` 的 `allowBuilds` 决定哪些依赖允许在安装期执行构建脚本。`esbuild`、`@swc/core`、`sharp`、`ttf2woff2`、`unrs-resolver`、`@heroui/shared-utils` 必须为 `true`，否则 vite 构建会失败。
+
+`@homebridge/node-pty-prebuilt-multiarch` 默认 `false`：它的 postinstall 要从 GitHub Releases 拉预编译二进制，网络不可达时会退回本地 node-gyp 并在 Windows + Node 22 上 `spawn EINVAL`。它只服务 WebUI 的终端面板，不影响 QQ 消息收发。要用终端面板时，把该项改成 `true`，在网络可达的环境重新 `pnpm i`。
+
 ## Welcome
 
 - NapCatQQ is a modern implementation of the Bot protocol based on NTQQ.
@@ -29,9 +68,9 @@ _Modern protocol-side framework implemented based on NTQQ._
 
 ## Quick Start
 
-可前往 [Release](https://github.com/NapNeko/NapCatQQ/releases/) 页面下载最新版本
+上游的 Release 页面已随仓库清空而失效，本仓库的安装包在 [Releases](https://github.com/vb2250158/NapCatQQ/releases) 提供，安装步骤见上方的「从这个仓库安装」。
 
-**首次使用**请务必查看如下文档看使用教程
+**首次使用**请务必看完上面的安装步骤与 [FORK-NOTES.md](./FORK-NOTES.md) 里的版本与限制说明。
 
 > 项目非盈利，涉及 对接问题/基础问题/下层框架问题 请自行搜索解决，本项目社区不提供此类解答。
 

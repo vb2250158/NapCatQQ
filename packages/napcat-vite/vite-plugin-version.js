@@ -53,12 +53,15 @@ function validateVersion (version) {
 export default function vitePluginNapcatVersion () {
   const pluginDir = path.resolve(__dirname, 'dist');
   const cacheFile = path.join(pluginDir, '.napcat-version.json');
-  const owner = 'NapNeko';
-  const repo = 'NapCatQQ';
+  // 上游 NapNeko/NapCatQQ 已于 2026-11-12 清空，tags 一并删除，此处默认指向
+  // 本恢复仓库；换维护仓库时用环境变量覆盖即可。
+  const owner = process.env.NAPCAT_REPO_OWNER || 'vb2250158';
+  const repo = process.env.NAPCAT_REPO_NAME || 'NapCatQQ';
   const maxAgeMs = 24 * 60 * 60 * 1000; // cache 1 day
   // CI 构建时可通过环境变量直接指定版本号
   const envVersion = process.env.NAPCAT_VERSION;
-  const fallbackVersion = '1.0.0-dev';
+  // 本源码基线对应 4.18.4；拉不到 tag 时不再回退成 1.0.0-dev
+  const fallbackVersion = process.env.NAPCAT_VERSION_FALLBACK || '4.18.4';
 
   fs.mkdirSync(pluginDir, { recursive: true });
 
