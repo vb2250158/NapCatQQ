@@ -23,8 +23,22 @@
 
 不想构建就用 Release：
 
+**Windows**
+
 - `NapCat.Shell.Windows.OneKey.zip` → 解压 → `NapCatInstaller.exe` → `NapCat.<build>.Shell\napcat.bat` → WebUI `127.0.0.1:6099` → 扫码
 - 安装器需要系统里已有 QQNT 客户端（9.9.x）
+
+**Linux / macOS**
+
+- `NapCat.Shell.Linux-macOS.zip` → 把 `napcat/` 放进 QQ 的 `resources/app/`，把该目录 `package.json` 的 `main` 改成 `./napcat/napcat.mjs`
+- macOS 改完必须 `codesign --force --deep --sign - /Applications/QQ.app`
+- 完整步骤见 [docs/INSTALL-Linux-macOS.md](./docs/INSTALL-Linux-macOS.md)
+
+为什么 Linux / macOS 不需要 exe：QQ 本身是 Electron，改了 `resources/app/package.json` 的 `main` 就会先加载 NapCat。Windows 的 `NapCatWinBootMain.exe` 只是替你完成「找到 QQ + 注入」这件事的启动器。代码层两个平台都有专门分支：`napcat-shell/data-path.ts` 用 `~/.config/QQ` 与 `~/Library/Application Support/QQ`，`process-api.ts` 处理 macOS 的 `QQ Helper` 子进程模型。
+
+原来的发布矩阵也印证这一点：`.github/workflows/release-publish.yml` 里 `NapCat.Shell` 与 `NapCat.Framework` 都在 `ubuntu-latest` 上构建，只有 OneKey 和 `.Windows.Node` 是 Windows 专属。
+
+跨平台包可以自己重打：`pnpm build:webui && pnpm build:shell && ./scripts/pack-crossplatform.sh`。
 
 ## 从源码构建（已在本机验证）
 

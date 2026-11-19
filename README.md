@@ -18,11 +18,15 @@ _Modern protocol-side framework implemented based on NTQQ._
 >
 > 本仓库保存清空前的最后一份完整源码（上游提交 `72912f2`），并重新提供可用的安装包：
 >
-> - 直接使用：[Releases](https://github.com/vb2250158/NapCatQQ/releases) → `NapCat.Shell.Windows.OneKey.zip`
+> - 直接使用：[Releases](https://github.com/vb2250158/NapCatQQ/releases)
+>   - Windows：`NapCat.Shell.Windows.OneKey.zip`
+>   - Linux / macOS：`NapCat.Shell.Linux-macOS.zip`
 > - 源码基线、恢复过程与已知限制：[FORK-NOTES.md](./FORK-NOTES.md)
 > - 上游原话是「如果感兴趣可以自行 Fork」，本仓库就是在做这件事。
 
-## 从这个仓库安装（Windows）
+## 从这个仓库安装
+
+### Windows
 
 1. 到 [Releases](https://github.com/vb2250158/NapCatQQ/releases) 下载 `NapCat.Shell.Windows.OneKey.zip`（约 29 MB）。
 2. 解压到任意目录，得到 `NapCatInstaller.exe`、`NapCat.Shell.zip`、`7z.exe`、`7z.dll`。
@@ -34,7 +38,26 @@ _Modern protocol-side framework implemented based on NTQQ._
    - WebSocket Client（反向 WS）：`ws://127.0.0.1:<你的网关端口>`
 7. 验证：`POST http://127.0.0.1:3000/get_status` 能返回 JSON 即通。
 
-本副本的安装包对应 **NapCat 4.18.4 / QQ 9.9.26-44498**。QQ 客户端升级后注入可能失效，换版本前先确认 `packages/napcat-protocol` 与 `packages/napcat-native` 是否覆盖。
+### Linux / macOS
+
+下载 `NapCat.Shell.Linux-macOS.zip`（约 33 MB），包内 `INSTALL-Linux-macOS.md` 是完整步骤。核心只有两步：
+
+1. 把包里的 `napcat/` 放到 QQ 的 `resources/app/napcat`：
+   - Linux：`/opt/QQ/resources/app`（deb / rpm），AppImage 为挂载后的 `squashfs-root/resources/app`
+   - macOS：`/Applications/QQ.app/Contents/Resources/app`
+2. 把该目录 `package.json` 的 `main` 改成 `./napcat/napcat.mjs`（改前先备份）。
+
+macOS 还要重新签名，否则 QQ 拒绝启动：
+
+```bash
+sudo codesign --force --deep --sign - /Applications/QQ.app
+```
+
+数据目录：Linux `~/.config/QQ`，macOS `~/Library/Application Support/QQ`。
+
+不需要 Windows 那套 exe / dll——QQ 本身是 Electron，改了 `main` 就会先加载 NapCat。Windows 的 `NapCatWinBootMain.exe` 只是替你干这件事。
+
+本副本对应 **NapCat 4.18.4 / QQ 9.9.26-44498**。QQ 客户端升级后注入可能失效，换版本前先确认 `packages/napcat-protocol` 与 `packages/napcat-native` 是否覆盖。
 
 ## 从源码构建
 
