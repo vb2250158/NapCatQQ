@@ -15,10 +15,39 @@
 
 ## 使用注意
 
-- 这是第三方 QQNT / OneBot 11 方案，不是官方 QQBot，账号存在风控与稳定性风险。
+- 这是第三方 QQNT / OneBot 11 方案，不是官方 QQBot，账号存在风控与稳定性风险。用专用小号。
 - 上游不再修 bug。QQ 客户端升级后协议可能失效，届时 `packages/napcat-protocol`、`napcat-native` 需要自己跟进。
-- 构建沿用原仓库：`pnpm i` 后按根 `package.json` 的脚本执行（`build:shell`、`build:framework`、`build:webui`、`build:plugin-builtin`）。
-- 本机已部署的安装包是 `NapCat.44498.Shell`（QQ 9.9.26-44498），与本源码基线不必完全对应，改动前先核对。
+- 本副本对应 **NapCat 4.18.4 / QQ 9.9.26-44498**。
+
+## 怎么拿到能跑的东西
+
+不想构建就用 Release：
+
+- `NapCat.Shell.Windows.OneKey.zip` → 解压 → `NapCatInstaller.exe` → `NapCat.<build>.Shell\napcat.bat` → WebUI `127.0.0.1:6099` → 扫码
+- 安装器需要系统里已有 QQNT 客户端（9.9.x）
+
+## 从源码构建（已在本机验证）
+
+```
+pnpm i
+pnpm build:webui        # 先出前端，shell 会把它复制进 dist
+pnpm build:shell
+pnpm build:framework
+pnpm build:plugin-builtin
+```
+
+验证结果：`pnpm i` 36s、`build:webui` 28s、`build:shell` 17s，产物 `packages/napcat-shell/dist`（108 MB，含 webui + native + plugins），内嵌版本号 `4.18.4`。
+
+### 上游没写、但必踩的两个坑
+
+1. **pnpm 10+ 会拦下依赖的构建脚本**。`pnpm-workspace.yaml` 的 `allowBuilds` 必须让 `esbuild`、`@swc/core`、`sharp`、`ttf2woff2`、`unrs-resolver`、`@heroui/shared-utils` 为 `true`，否则 vite 直接构建失败。
+2. **`node-pty` 装不上**（默认已设 `false`）。它的 postinstall 要从 GitHub Releases 拉预编译二进制，拉不到就退回 node-gyp，在 Windows + Node 22 上 `spawn EINVAL`。它只服务 WebUI 的终端面板，不影响消息收发。要终端就把该项改 `true`，在网络可达的环境重装。
+
+另有一个非阻塞告警：`ttf2woff2` 的 node-gyp 在 Python 3.12+ 上因 `distutils` 被移除而失败。它只做字体子集化，失败不影响构建产物。
+
+### 版本号来源已改
+
+`packages/napcat-vite/vite-plugin-version.js` 原本从 `NapNeko/NapCatQQ` 的 tags 取版本，上游删库后回退成 `1.0.0-dev`。现在默认读本仓库 tags，兜底 `4.18.4`；需要换维护仓库时用 `NAPCAT_REPO_OWNER` / `NAPCAT_REPO_NAME` 覆盖。
 
 ## 相关
 
